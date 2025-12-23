@@ -1,1 +1,277 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DR 360° - Dodge Recian</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#000;color:#fff;overflow:hidden}#app{width:100vw;height:100vh;display:flex;flex-direction:column}#canvas{width:100%;height:100%;display:block}#landing{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,#1a1a1a 0%,#000 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3rem;z-index:100}#landing h1{font-size:6rem;font-weight:900;letter-spacing:0.1em;background:linear-gradient(135deg,#fff 0%,#D4AF37 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(212,175,55,0.4));animation:fadeIn 0.8s ease-out}#landing .subtitle{font-size:1.2rem;letter-spacing:0.15em;color:#D4AF37;font-weight:300}#landing .subsubtitle{font-size:0.9rem;color:#999;font-weight:300;margin-top:-1rem}#landing label{background:#D4AF37;color:#000;padding:1rem 2.5rem;border-radius:2.5rem;cursor:pointer;font-weight:700;font-size:1.1rem;transition:all 0.3s ease;box-shadow:0 0 40px rgba(212,175,55,0.5);display:flex;align-items:center;gap:0.8rem}#landing label:hover{transform:scale(1.08);box-shadow:0 0 60px rgba(212,175,55,0.8)}#landing input[type="file"]{display:none}#hint{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);border:1px solid rgba(212,175,55,0.3);padding:0.9rem 1.8rem;border-radius:2rem;font-size:0.9rem;color:#D4AF37;display:none;white-space:nowrap;backdrop-filter:blur(10px)}.controls{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.95),rgba(0,0,0,0.7),transparent);padding:2rem;display:none;flex-direction:column;gap:1.5rem;z-index:50}.controls.show{display:flex}.progress{width:100%;height:5px;background:rgba(255,255,255,0.15);cursor:pointer;border-radius:3px;overflow:hidden}.progress-bar{height:100%;background:#D4AF37;width:0%;transition:width 0.1s linear}.controls-bar{display:flex;align-items:center;justify-content:space-between;gap:2rem}@media(max-width:768px){.controls-bar{flex-direction:column;gap:1rem}}.controls-left,.controls-right{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}button{background:rgba(212,175,55,0.1);border:1.5px solid rgba(212,175,55,0.4);color:#fff;padding:0.6rem 1.2rem;border-radius:0.6rem;cursor:pointer;transition:all 0.3s ease;font-size:0.9rem;font-weight:600;white-space:nowrap}button:hover{background:#D4AF37;color:#000;border-color:#D4AF37;transform:scale(1.05)}button.active{background:#D4AF37;color:#000}button svg{width:20px;height:20px}.time-display{color:#D4AF37;font-size:0.85rem;min-width:90px;text-align:center}@keyframes fadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}</style></head><body><div id="app"><canvas id="canvas"></canvas><div id="landing"><h1>▶ DR 360°</h1><div><div class="subtitle">DODGE RECIAN</div><div class="subsubtitle">Experiência Imersiva Premium</div></div><label>📄 Carregar Video Local<input type="file" id="fileInput" accept="video/*" /></label></div><div id="hint">💳 Suporta vídeos equiretangulares (formato 360° padrão)</div><div class="controls" id="controls"><div class="progress" id="progress"><div class="progress-bar" id="progressBar"></div></div><div class="controls-bar"><div class="controls-left"><button id="playBtn">▶️ Play</button><button id="muteBtn">🔊</button><span class="time-display"><span id="currentTime">0:00</span>/<span id="duration">0:00</span></span></div><div class="controls-right"><button id="fsBtn">📏 Fullscreen</button></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script>let scene,camera,renderer,video,sphere;let isPlaying=false,isMuted=false;const fileInput=document.getElementById('fileInput');const canvas=document.getElementById('canvas');const landing=document.getElementById('landing');const controlsEl=document.getElementById('controls');const hint=document.getElementById('hint');function init(){scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(window.devicePixelRatio);renderer.setClearColor(0x000000);video=document.createElement('video');video.crossOrigin='anonymous';video.loop=true;const texture=new THREE.VideoTexture(video);texture.minFilter=THREE.LinearFilter;const geometry=new THREE.SphereGeometry(250,64,32);geometry.scale(-1,1,1);const material=new THREE.MeshBasicMaterial({map:texture});sphere=new THREE.Mesh(geometry,material);scene.add(sphere);let rotation={lon:0,lat:0,isDown:false,x:0,y:0};document.addEventListener('mousedown',e=>{rotation.isDown=true;rotation.x=e.clientX;rotation.y=e.clientY});document.addEventListener('mousemove',e=>{if(!rotation.isDown)return;rotation.lon+=(e.clientX-rotation.x)*0.1;rotation.lat-=(e.clientY-rotation.y)*0.1;rotation.lat=Math.max(-85,Math.min(85,rotation.lat));rotation.x=e.clientX;rotation.y=e.clientY});document.addEventListener('mouseup',()=>{rotation.isDown=false});document.addEventListener('touchstart',e=>{rotation.isDown=true;rotation.x=e.touches[0].clientX;rotation.y=e.touches[0].clientY});document.addEventListener('touchmove',e=>{if(!rotation.isDown)return;rotation.lon+=(e.touches[0].clientX-rotation.x)*0.1;rotation.lat-=(e.touches[0].clientY-rotation.y)*0.1;rotation.lat=Math.max(-85,Math.min(85,rotation.lat));rotation.x=e.touches[0].clientX;rotation.y=e.touches[0].clientY});document.addEventListener('touchend',()=>{rotation.isDown=false});function animate(){requestAnimationFrame(animate);const phi=THREE.MathUtils.degToRad(90-(rotation.lat||0));const theta=THREE.MathUtils.degToRad(rotation.lon||0);camera.position.x=100*Math.sin(phi)*Math.cos(theta);camera.position.y=100*Math.cos(phi);camera.position.z=100*Math.sin(phi)*Math.sin(theta);camera.lookAt(scene.position);renderer.render(scene,camera)}animate();fileInput.addEventListener('change',e=>{const file=e.target.files[0];if(file){const url=URL.createObjectURL(file);video.src=url;video.load();landing.style.display='none';controlsEl.classList.add('show');hint.style.display='block'}});document.getElementById('playBtn').addEventListener('click',()=>{if(isPlaying){video.pause();document.getElementById('playBtn').textContent='▶️ Play'}else{video.play();document.getElementById('playBtn').textContent='⏸️ Pause'}isPlaying=!isPlaying});document.getElementById('muteBtn').addEventListener('click',()=>{isMuted=!isMuted;video.muted=isMuted;document.getElementById('muteBtn').textContent=isMuted?'🔈':'🔊'});document.getElementById('fsBtn').addEventListener('click',()=>{if(document.fullscreenElement){document.exitFullscreen()}else{document.documentElement.requestFullscreen()}});document.getElementById('progress').addEventListener('click',e=>{if(!video)return;const rect=e.target.getBoundingClientRect();const percent=(e.clientX-rect.left)/rect.width;video.currentTime=percent*video.duration});video.addEventListener('timeupdate',()=>{const percent=(video.currentTime/video.duration)*100;document.getElementById('progressBar').style.width=percent+'%';document.getElementById('currentTime').textContent=formatTime(video.currentTime);document.getElementById('duration').textContent=formatTime(video.duration)});function formatTime(seconds){if(!seconds||isNaN(seconds))return'0:00';const mins=Math.floor(seconds/60);const secs=Math.floor(seconds%60);return`${mins}:${secs.toString().padStart(2,'0')}`}window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight)})}init()</script></body></html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DR 360° - Dodge Recian</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            line-height: 1.6;
+        }
+        header {
+            background: rgba(15, 15, 15, 0.95);
+            border-bottom: 2px solid #D4AF37;
+            padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #D4AF37;
+            text-decoration: none;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 2rem;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: #D4AF37;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            border-bottom: 2px solid #D4AF37;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #D4AF37;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: #D4AF37;
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid #D4AF37;
+        }
+        .cta-button:hover {
+            background: transparent;
+            color: #D4AF37;
+        }
+        .features {
+            padding: 4rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .feature-card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid #D4AF37;
+            padding: 2rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+        }
+        .feature-card h3 {
+            color: #D4AF37;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        .feature-card p {
+            color: #aaa;
+        }
+        .tutorial {
+            padding: 4rem 0;
+            border-top: 2px solid #D4AF37;
+            border-bottom: 2px solid #D4AF37;
+            background: rgba(10, 10, 10, 0.5);
+        }
+        .tutorial h2 {
+            color: #D4AF37;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .tutorial-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        .step {
+            background: rgba(20, 20, 20, 0.8);
+            border-left: 4px solid #D4AF37;
+            padding: 1.5rem;
+            border-radius: 5px;
+        }
+        .step h3 {
+            color: #D4AF37;
+            margin-bottom: 0.5rem;
+        }
+        .step p {
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+        footer {
+            background: rgba(15, 15, 15, 0.95);
+            border-top: 2px solid #D4AF37;
+            padding: 2rem 0;
+            margin-top: 4rem;
+            text-align: center;
+            color: #888;
+        }
+        footer a {
+            color: #D4AF37;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            nav a {
+                margin-left: 1rem;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">🦅 DR 360°</div>
+            <nav>
+                <a href="#features">Recursos</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="#app">Acessar App</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>DR 360° - Dodge Recian</h1>
+            <p>Experiência Imersiva Premium em Vídeos 360°</p>
+            <a href="https://ai.studio/apps/drive/1YJu-PnuwAaHhj7NSugpM2wL8IBnql5tc" class="cta-button">Acessar o App</a>
+        </div>
+    </section>
+
+    <section class="container" id="features">
+        <div class="features">
+            <div class="feature-card">
+                <div class="icon">🎥</div>
+                <h3>Visualização 360°</h3>
+                <p>Explore vídeos em 360 graus com múltiplas perspectivas e controle total de visualização.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🥽</div>
+                <h3>Modo VR</h3>
+                <p>Suporte completo para óculos de realidade virtual com renderização estereoscópica.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔍</div>
+                <h3>Head Tracking</h3>
+                <p>Rastreamento de movimento com giroscópio do dispositivo para imersão total.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🎮</div>
+                <h3>Controles Completos</h3>
+                <p>Play/Pause, volume, velocidade de reprodução e barra de progresso intuitiva.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⬇️</div>
+                <h3>Download</h3>
+                <p>Salve e compartilhe seus vídeos 360° com facilidade em múltiplos formatos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔄</div>
+                <h3>Loop Automático</h3>
+                <p>Reprodução contínua com opções personalizáveis de repetição de vídeo.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="tutorial" id="tutorial">
+        <div class="container">
+            <h2>Como Usar o DR 360°</h2>
+            <div class="tutorial-steps">
+                <div class="step">
+                    <h3>1. Acessar o App</h3>
+                    <p>Clique no botão "Acessar o App" para abrir o player DR 360° em uma nova aba do navegador.</p>
+                </div>
+                <div class="step">
+                    <h3>2. Carregar Vídeo</h3>
+                    <p>Use a interface do app para carregar seu arquivo de vídeo 360° ou URL de streaming.</p>
+                </div>
+                <div class="step">
+                    <h3>3. Explorar em 360°</h3>
+                    <p>Mova seu mouse ou dispositivo para explorar o vídeo em todas as direções.</p>
+                </div>
+                <div class="step">
+                    <h3>4. Modo VR (opcional)</h3>
+                    <p>Ative o modo VR para usar com óculos de realidade virtual para imersão completa.</p>
+                </div>
+                <div class="step">
+                    <h3>5. Controlar Reprodução</h3>
+                    <p>Use os controles para ajustar volume, velocidade e outros parâmetros de visualização.</p>
+                </div>
+                <div class="step">
+                    <h3>6. Compartilhar</h3>
+                    <p>Download ou compartilhe seus vídeos favoritos através do botão de compartilhamento.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <div style="padding: 3rem 0; text-align: center;">
+            <h2 style="color: #D4AF37; margin-bottom: 1.5rem;">Experimente Agora</h2>
+            <a href="https://ai.studio/apps/drive/1YJu-PnuwAaHhj7NSugpM2wL8IBnql5tc" class="cta-button">Iniciar o App DR 360°</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 DR 360° - Dodge Recian. Todos os direitos reservados.</p>
+        <p>Desenvolvido com ❤️ para experiências imersivas premium</p>
+    </footer>
+</body>
+</html>
