@@ -1,85 +1,72 @@
-# DR 360° - Dodge Recian
+# DR 360° — Dodge Recian
 
-## Experiência Imersiva Premium
+## Visão geral
 
-Aplicativo web moderno para visualização de vídeos em 360 graus com suporte completo para VR, Head Tracking com giroscópio e múltiplas perspectivas de visualização.
+Aplicativo web para visualização de vídeos em 360 graus, com proposta de experiência imersiva, múltiplas perspectivas e controles de mídia.
 
-### Características Principais
+Este repositório é uma implementação separada do projeto [dr-360](https://github.com/WalyRobert/dr-360). Os dois projetos têm objetivos semelhantes, mas estruturas e dependências diferentes. Consulte os respectivos códigos antes de tratá-los como versões equivalentes.
 
-✨ **Recursos Avançados:**
-- 📹 **Visualização 360°/180°/120°** - Escolha a perspectiva desejada
-- 🎮 **Modo VR** - Suporte para óculos VR com renderização estereoscópica
-- 📱 **Head Tracking** - Rastreamento de movimento com giroscópio do dispositivo
-- 🎬 **Controles Completos** - Play/Pause, volume, velocidade de reprodução, progresso
-- 💾 **Download** - Salve e compartilhe seus vídeos 360°
-- 🔄 **Loop Automático** - Reprodução contínua
-- 🎯 **Retorno ao Centro** - Auto-reset automático após inatividade
+**Status:** implementação independente; compatibilidade e funcionalidades devem ser validadas na versão publicada.
 
-### Design Elegante
+## Funcionalidades descritas pelo projeto
 
-- Tema **Preto & Dourado** (#D4AF37) moderno e sofisticado
-- Interface intuitiva com hover effects suaves
-- Responsivo para desktop e mobile
-- Controles desaparecem após 3 segundos de inatividade
+- Visualização panorâmica 360°/180°/120°.
+- Controles de reprodução, volume, velocidade e progresso.
+- Suporte anunciado a modo VR e head tracking.
+- Interface responsiva para desktop e dispositivos móveis.
+- Reprodução de vídeos MP4, WebM e Ogg, conforme descrição do projeto.
 
-### Stack Tecnológico
+> As funcionalidades acima refletem a documentação do projeto. O suporte efetivo a headsets, sensores e dispositivos específicos ainda precisa ser validado por testes.
 
-- **React 18** com TypeScript
-- **Three.js** para renderização 3D
-- **Lucide React** para ícones
-- **Vite** para build otimizado
-- **Vercel** para deployment contínuo
+## Tecnologias declaradas
 
-### Instalação
+- React 18
+- TypeScript
+- Three.js
+- Lucide React
+- Vite
+
+## Instalação
+
+**Pré-requisito:** Node.js e npm.
 
 ```bash
-# Clone o repositório
 git clone https://github.com/WalyRobert/dr360-app.git
 cd dr360-app
-
-# Instale as dependências
 npm install
-
-# Inicie o servidor de desenvolvimento
 npm run dev
-
-# Build para produção
-npm run build
 ```
 
-### Como Usar
-
-1. **Carregue um vídeo 360°** - Clique em "Carregar Vídeo Local"
-2. **Navegue** - Arraste com mouse ou toque para explorar
-3. **Controle** - Use os botões para reprodução e opções
-4. **VR** - Ative o modo VR e use seus óculos
-5. **Head Tracking** - Ative o rastreamento para controlar com movimento do dispositivo
-
-### Formatos Suportados
-
-- MP4, WebM, Ogg
-- Vídeos em formato equiretangular (360° padrão)
-
-### Deploy
+Para gerar o build:
 
 ```bash
-# Deploy automático no Vercel
+npm run build
+npm run preview
+```
+
+O script `deploy` utiliza a CLI do Vercel, que precisa estar instalada e configurada no ambiente:
+
+```bash
 npm run deploy
 ```
 
-### Acesse Online
+## Próximas etapas
 
-🌐 **https://dr360graus.com.br**
+- [ ] Documentar a arquitetura e os principais componentes.
+- [ ] Confirmar a implementação de head tracking no código.
+- [ ] Testar o modo VR nos dispositivos declarados como compatíveis.
+- [ ] Adicionar testes automatizados e evidências de build.
+- [ ] Registrar capturas de tela e vídeo demonstrativo.
+- [ ] Explicar a relação e as diferenças em relação ao repositório `dr-360`.
 
-### Autor
+## Demonstração
 
-**Dodge Recian**  
-Desenvolvimento de experiências imersivas em 3D e realidade virtual.
+Projeto associado ao endereço informado na documentação original: https://dr360graus.com.br
 
-### Licença
+A disponibilidade e o funcionamento do endereço devem ser verificados periodicamente.
 
-MIT
+## Autor / marca do projeto
 
----
+Dodge Recian
 
-**Desenvolvido com ❤️ para experiências imersivas de qualidade premium**
+Repositório mantido na conta GitHub WalyRobert.
